@@ -86,6 +86,8 @@ class Psych implements IAdapter {
 		#if (FM_ENGINE_VERSION >= "1.0")
 		if (arrow is NoteSplash) @:privateAccess
 			return cast(arrow, NoteSplash).babyArrow.noteData;
+		if (arrow is SustainSplash) @:privateAccess
+			return cast(arrow, SustainSplash).strumNote.noteData;
 		#end
 
 		return 0;
@@ -99,6 +101,8 @@ class Psych implements IAdapter {
 		#if (FM_ENGINE_VERSION >= "1.0")
 		if (arrow is NoteSplash) @:privateAccess
 			return cast(arrow, NoteSplash).babyArrow.player;
+		if (arrow is SustainSplash) @:privateAccess
+			return cast(arrow, SustainSplash).strumNote.player;
 		#end
 		return 0;
 	}
