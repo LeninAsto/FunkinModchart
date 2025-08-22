@@ -74,11 +74,12 @@ class Pslice extends Psych {
 			counts[player][strumNote.isSustainNote ? 2 : 1]++;
 		});
 
-		for (player in 0...2) {
-			for (i in 0...4) {
-				pspr[player][i].resize(counts[player][i]);
-			}
-		}
+		   for (player in 0...2) {
+			   for (i in 0...4) {
+				   if (pspr[player][i] == null) pspr[player][i] = [];
+				   pspr[player][i].resize(counts[player][i]);
+			   }
+		   }
 
 		@:privateAccess
 		PlayState.instance.grpNoteSplashes.forEachAlive(splash -> {

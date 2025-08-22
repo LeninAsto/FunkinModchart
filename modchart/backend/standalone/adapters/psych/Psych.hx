@@ -169,36 +169,43 @@ class Psych implements IAdapter {
 	// 0 receptors
 	// 1 tap arrows
 	// 2 hold arrows
-	public function getArrowItems() {
-		var pspr:Array<Array<Array<FlxSprite>>> = [[[], [], [], []], [[], [], [], []]];
+	   public function getArrowItems() {
+		   // Siempre inicializar todos los subarrays para evitar null
+		   var pspr:Array<Array<Array<FlxSprite>>> = [[[], [], [], []], [[], [], [], []]];
 
-		@:privateAccess
-		PlayState.instance.strumLineNotes.forEachAlive(strumNote -> {
-			if (pspr[strumNote.player] == null)
-				pspr[strumNote.player] = [];
+		   @:privateAccess
+		   PlayState.instance.strumLineNotes.forEachAlive(strumNote -> {
+			   if (pspr[strumNote.player] == null)
+				   pspr[strumNote.player] = [[], [], [], []];
+			   for (i in 0...4) if (pspr[strumNote.player][i] == null) pspr[strumNote.player][i] = [];
+			   pspr[strumNote.player][0].push(strumNote);
+		   });
+		   PlayState.instance.notes.forEachAlive(strumNote -> {
+			   final player = Adapter.instance.getPlayerFromArrow(strumNote);
+			   if (pspr[player] == null)
+				   pspr[player] = [[], [], [], []];
+			   for (i in 0...4) if (pspr[player][i] == null) pspr[player][i] = [];
+			   pspr[player][strumNote.isSustainNote ? 2 : 1].push(strumNote);
+		   });
+		   #if (FM_ENGINE_VERSION >= "1.0")
+		   PlayState.instance.grpNoteSplashes.forEachAlive(splash -> {
+			   @:privateAccess
+			   if (splash.babyArrow != null && splash.active) {
+				   final player = splash.babyArrow.player;
+				   if (pspr[player] == null)
+					   pspr[player] = [[], [], [], []];
+				   for (i in 0...4) if (pspr[player][i] == null) pspr[player][i] = [];
+				   pspr[player][3].push(splash);
+			   }
+		   });
+		   #end
 
-			pspr[strumNote.player][0].push(strumNote);
-		});
-		PlayState.instance.notes.forEachAlive(strumNote -> {
-			final player = Adapter.instance.getPlayerFromArrow(strumNote);
-			if (pspr[player] == null)
-				pspr[player] = [];
+		   // Garantizar que todos los subarrays existen
+		   for (p in 0...pspr.length) {
+			   if (pspr[p] == null) pspr[p] = [[], [], [], []];
+			   for (i in 0...4) if (pspr[p][i] == null) pspr[p][i] = [];
+		   }
 
-			pspr[player][strumNote.isSustainNote ? 2 : 1].push(strumNote);
-		});
-		#if (FM_ENGINE_VERSION >= "1.0")
-		PlayState.instance.grpNoteSplashes.forEachAlive(splash -> {
-			@:privateAccess
-			if (splash.babyArrow != null && splash.active) {
-				final player = splash.babyArrow.player;
-				if (pspr[player] == null)
-					pspr[player] = [];
-
-				pspr[player][3].push(splash);
-			}
-		});
-		#end
-
-		return pspr;
-	}
+		   return pspr;
+	   }
 }

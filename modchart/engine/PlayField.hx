@@ -286,19 +286,19 @@ final class PlayField extends FlxSprite {
 				}
 			}
 
-			// holds
-			if (holdLength > 0) {
-				for (hold in curItems[2]) {
-					if (!getVisibility(hold))
-						continue;
+			   // holds
+			   if (holdLength > 0 && curItems[2] != null) {
+				   for (hold in curItems[2]) {
+					   if (hold == null || !getVisibility(hold))
+						   continue;
 
-					holdRenderer.prepare(hold);
-					queue({
-						callback: holdRenderer.shift,
-						z: hold._z
-					});
-				}
-			}
+					   holdRenderer.prepare(hold);
+					   queue({
+						   callback: holdRenderer.shift,
+						   z: hold._z
+					   });
+				   }
+			   }
 
 			// tap arrow
 			if (arrowLength > 0) {
