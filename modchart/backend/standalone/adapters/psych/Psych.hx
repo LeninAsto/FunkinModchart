@@ -125,10 +125,12 @@ class Psych implements IAdapter {
 	public function getHoldLength(item:FlxSprite):Float
 		return __fCrochet;
 
-	public function getHoldParentTime(arrow:FlxSprite) {
-		final note:Note = cast arrow;
-		return note.parent.strumTime;
-	}
+	   public function getHoldParentTime(arrow:FlxSprite) {
+		   final note:Note = cast arrow;
+		   if (note.parent != null)
+			   return note.parent.strumTime;
+		   return note.strumTime;
+	   }
 
 	public function getDownscroll():Bool {
 		#if (FM_ENGINE_VERSION >= "0.7")

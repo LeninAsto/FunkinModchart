@@ -56,12 +56,12 @@ class Pslice extends Psych {
 			}
 		});
 
-		@:privateAccess
-		PlayState.instance.grpHoldSplashes.forEachAlive(splash -> {
-			if (splash.strumNote != null && splash.active) {
-				counts[splash.strumNote.player][3]++;
-			}
-		});
+		   @:privateAccess
+		   PlayState.instance.grpHoldSplashes.forEachAlive(splash -> {
+			   if (splash.strumNote != null && splash.active) {
+				   counts[splash.strumNote.player][3]++;
+			   }
+		   });
 
 		@:privateAccess
 		PlayState.instance.strumLineNotes.forEachAlive(strumNote -> {
@@ -88,13 +88,14 @@ class Pslice extends Psych {
 			}
 		});
 
-		@:privateAccess
-		PlayState.instance.grpHoldSplashes.forEachAlive(splash -> {
-			if (splash.strumNote != null && splash.active) {
-				var player = splash.strumNote.player;
-				pspr[player][3][indices[player][3]++] = splash;
-			}
-		});
+		   @:privateAccess
+		   PlayState.instance.grpHoldSplashes.forEachAlive(splash -> {
+			   if (splash.strumNote != null && splash.active) {
+				   var player = splash.strumNote.player;
+				   // Solo asociar si strumNote no es null y está activa
+				   pspr[player][3][indices[player][3]++] = splash;
+			   }
+		   });
 
 		@:privateAccess
 		PlayState.instance.strumLineNotes.forEachAlive(strumNote -> {
