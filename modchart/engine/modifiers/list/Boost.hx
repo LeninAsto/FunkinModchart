@@ -35,5 +35,5 @@ class Boost extends Modifier {
 	}
 
 	override public function shouldRun(params:ModifierParameters):Bool
-		return true;
+		return params.isTapArrow;
 }
