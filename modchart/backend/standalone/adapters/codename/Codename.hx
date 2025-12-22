@@ -21,6 +21,7 @@ class Codename implements IAdapter {
 		#end
 
 		FlxG.signals.postDraw.add(postDraw);
+		FlxG.signals.preStateSwitch.addOnce(() -> FlxG.signals.postDraw.remove(postDraw));
 	}
 
 	public function isTapNote(sprite:FlxSprite)
