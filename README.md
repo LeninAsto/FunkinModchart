@@ -102,7 +102,6 @@ You can even **swap adapters at runtime** — perfect for editors or very crazy 
 |------|--------------|
 | **Lead Programmer** | [Theo](https://x.com/_the0p) |
 | **Help with Optimization** | Ne_Eo (aka. Neo) |
-| **Maintainer** | [EdwhakKB](https://x.com/EDWHAK_KB) |
 | **Math References** | [OpenITG](https://openitg.gr-p.com/) |
 | **Code References** | [Schmovin by 4mbr0s3](https://github.com/4mbr0s3-2/Schmovin) |
 | **Logo Artist** | [Soihan](https://x.com/SoihanP) |
