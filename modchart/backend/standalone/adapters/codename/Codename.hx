@@ -14,8 +14,11 @@ import modchart.backend.standalone.IAdapter;
 class Codename implements IAdapter {
 	public function new() {}
 
+	public function onModchartingDispose() {
+		FlxG.signals.postDraw.remove(postDraw);
+	}
+
 	public function onModchartingInitialization() {
-		// do nothing
 		#if (FM_ENGINE_VERSION == "1.0")
 		PlayState.instance.splashHandler.visible = false;
 		#end
@@ -193,6 +196,7 @@ class Codename implements IAdapter {
 
 	function postDraw() {
 		var strumLineMembers = PlayState.instance.strumLines.members;
+
 		for (i in 0...strumLineMembers.length)
 			@:privateAccess {
 			final sl = strumLineMembers[i];

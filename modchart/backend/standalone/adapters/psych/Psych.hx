@@ -31,6 +31,8 @@ class Psych implements IAdapter {
 		}
 	}
 
+	public function onModchartingDispose() {}
+
 	public function onModchartingInitialization() {
 		__fCrochet = (Conductor.crochet + 8) / 4;
 	}

@@ -13,10 +13,10 @@ With this library, you can easily:
 - Use a **dynamic event system** to animate modifier values over time.  
 - Create **custom easing effects** and **complex visual transitions** — all with simple scripting.
 
-And that’s just the start. FunkinModchart also gives you **extra visual tools** like:
-- Visualizing Arrow Paths
-- 3D Camera System
-- Multiple **Playfields** and **Proxies** for even craziers results
+And that’s just the start. FunkinModchart also gives you **extra cool stuff** like:
+- Arrow Trajectory Rendering (aka. Arrow Paths)
+- Customizable 3D Camera (per-playfield)
+- Multiple **Playfields** for even craziers results
 
 If you’ve ever used **NotITG** or **StepMania**, you’ll feel right at home.
 

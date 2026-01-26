@@ -7,6 +7,8 @@ import objects.SustainSplash;
 import states.PlayState;
 
 class Pslice extends Psych {
+	public function onModchartingDispose() {}
+
 	override public function onModchartingInitialization() {
 		super.onModchartingInitialization();
 

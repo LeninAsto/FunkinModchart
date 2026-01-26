@@ -153,3 +153,6 @@
 ## October, 24, 2025
 - Fixed holds from player 0 appearing just after a hold from player 1 appears.
 - Added the logo.
+
+## 1.3
+- Rewrote the render pipeline (due to batching, Z INDEX MIGHT BROKE IF NOTES HAVE DIFFERENT SHADER, BLEND OR ANTIALIASING)

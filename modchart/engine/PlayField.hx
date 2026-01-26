@@ -13,7 +13,6 @@ import modchart.engine.events.types.*;
 import openfl.display.BitmapData;
 import openfl.geom.Rectangle;
 
-// TODO: make this extend to flxsprite and use parented transformation matrix
 #if !openfl_debug
 @:fileXml('tags="haxe,release"')
 @:noDebug
@@ -23,11 +22,7 @@ final class PlayField extends FlxSprite {
 	public var modifiers:ModifierGroup;
 	public var camera3D:ModchartCamera3D;
 
-	private var arrowRenderer:ModchartArrowRenderer;
-	private var receptorRenderer:ModchartArrowRenderer;
-	private var attachmentRenderer:ModchartArrowRenderer;
-	private var holdRenderer:ModchartHoldRenderer;
-	private var pathRenderer:ModchartPathRenderer;
+	private var renderer:ModchartRenderer;
 
 	public var projection:ModchartPerspective;
 
@@ -39,11 +34,7 @@ final class PlayField extends FlxSprite {
 		this.events = new EventManager(this);
 		this.modifiers = new ModifierGroup(this);
 
-		arrowRenderer = new ModchartArrowRenderer(this);
-		receptorRenderer = new ModchartArrowRenderer(this);
-		attachmentRenderer = new ModchartArrowRenderer(this);
-		holdRenderer = new ModchartHoldRenderer(this);
-		pathRenderer = new ModchartPathRenderer(this);
+		renderer = new ModchartRenderer(this);
 
 		camera3D = new ModchartCamera3D();
 		projection = new ModchartPerspective();
@@ -201,15 +192,9 @@ final class PlayField extends FlxSprite {
 	}
 
 	override public function destroy() {
-		arrowRenderer.dispose();
-		holdRenderer.dispose();
-		receptorRenderer.dispose();
-		attachmentRenderer.dispose();
-		pathRenderer.dispose();
+		renderer.dispose();
 		super.destroy();
 	}
-
-	var drawCB:Array<{callback:Void->Void, z:Float}> = [];
 
 	private function getVisibility(obj:flixel.FlxObject) {
 		@:bypassAccessor obj.visible = false;
@@ -217,131 +202,10 @@ final class PlayField extends FlxSprite {
 	}
 
 	private function __drawPlayField() {
-		drawCB = [];
-
-		// TODO: prepare arrow paths shit
-		var pathAlphaTotal = .0;
-
 		var playerItems:Array<Array<Array<FlxSprite>>> = Adapter.instance.getArrowItems();
 
-		// used for preallocate
-		var receptorLength = 0;
-		var arrowLength = 0;
-		var holdLength = 0;
-		var attachmentLength = 0;
-
-		for (i in 0...playerItems.length) {
-			final curItems = playerItems[i];
-
-			if (curItems[0] != null)
-				receptorLength = receptorLength + curItems[0].length;
-			if (curItems[1] != null)
-				arrowLength = arrowLength + curItems[1].length;
-			if (curItems[2] != null)
-				holdLength = holdLength + curItems[2].length;
-			if (curItems[3] != null)
-				attachmentLength = attachmentLength + curItems[3].length;
-		}
-
-		if (receptorLength != 0)
-			receptorRenderer.preallocate(receptorLength);
-		if (arrowLength != 0)
-			arrowRenderer.preallocate(arrowLength);
-		if (holdLength != 0)
-			holdRenderer.preallocate(holdLength);
-		if (attachmentLength != 0)
-			attachmentRenderer.preallocate(attachmentLength);
-
-		if (Config.RENDER_ARROW_PATHS)
-			pathRenderer.preallocate(receptorLength);
-
-		drawCB.resize(receptorLength + arrowLength + holdLength + attachmentLength);
-
-		var j = 0;
-		inline function queue(f:{callback:Void->Void, z:Float}) {
-			drawCB[j] = f;
-			j++;
-		}
-
-		// i is player index
-		for (i in 0...playerItems.length) {
-			var curItems:Array<Array<FlxSprite>> = playerItems[i];
-
-			if (curItems == null || curItems.length == 0)
-				continue;
-
-			final drawHolds = () -> {
-				if (holdLength > 0) {
-					for (hold in curItems[2]) {
-						if (!getVisibility(hold))
-							continue;
-
-						holdRenderer.prepare(hold);
-						queue({
-							callback: holdRenderer.shift,
-							z: hold._z
-						});
-					}
-				}
-			};
-
-			// holds (behind strums)
-			if (Config.HOLDS_BEHIND_STRUM)
-				drawHolds();
-
-			// receptors
-			if (receptorLength > 0) {
-				for (receptor in curItems[0]) {
-					if (!getVisibility(receptor))
-						continue;
-
-					receptorRenderer.prepare(receptor);
-					if (Config.RENDER_ARROW_PATHS)
-						pathRenderer.prepare(receptor);
-					queue({
-						callback: receptorRenderer.shift,
-						z: receptor._z
-					});
-				}
-			}
-
-			// holds (infront of strums)
-			if (!Config.HOLDS_BEHIND_STRUM)
-				drawHolds();
-
-			// tap arrow
-			if (arrowLength > 0) {
-				for (arrow in curItems[1]) {
-					if (!getVisibility(arrow))
-						continue;
-
-					arrowRenderer.prepare(arrow);
-					queue({
-						callback: arrowRenderer.shift,
-						z: arrow._z
-					});
-				}
-			}
-
-			// attachments (splashes)
-			if (attachmentLength > 0) {
-				for (attachment in curItems[3]) {
-					if (!getVisibility(attachment))
-						continue;
-
-					attachmentRenderer.prepare(attachment);
-					queue({
-						callback: attachmentRenderer.shift,
-						z: attachment._z
-					});
-				}
-			}
-		}
-
-		for (r in [receptorRenderer, arrowRenderer, holdRenderer, attachmentRenderer])
-			r.sort();
-
-		if (Config.RENDER_ARROW_PATHS)
-			pathRenderer.shift();
+		if (playerItems == null)
+			return;
+		renderer.emit(playerItems);
 	}
 }

@@ -10,7 +10,7 @@ import flixel.math.FlxMath;
 import flixel.math.FlxMatrix;
 import haxe.ds.Vector as NativeVector;
 import modchart.backend.core.ModifierOutput;
-import modchart.backend.graphics.ModchartRenderer.FMDrawInstruction;
+import modchart.backend.graphics.DrawCommand;
 import modchart.backend.graphics.ModchartRenderer;
 import openfl.Vector;
 import openfl.display.GraphicsPathCommand;
