@@ -235,7 +235,7 @@ final class Manager extends FlxBasic {
 	/**
 	 * Adds a playfield to the Manager.
 	 */
-	public inline function appendPlayfield(playfield:PlayFiekd)
+	public inline function appendPlayfield(playfield:PlayField)
 		playfields.push(playfield);
 
 	/**
