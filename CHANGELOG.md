@@ -154,5 +154,7 @@
 - Fixed holds from player 0 appearing just after a hold from player 1 appears.
 - Added the logo.
 
-## 1.3
-- Rewrote the render pipeline (due to batching, Z INDEX MIGHT BROKE IF NOTES HAVE DIFFERENT SHADER, BLEND OR ANTIALIASING)
+## January, 29, 2026
+- Rewrote rendering pipeline entirely.
+- Playfield now are affected by the FlxSprite (+skew) properties.
+- Major bugfixes.
