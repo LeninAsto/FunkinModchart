@@ -44,7 +44,7 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 		tailFactor = ModchartUtil.rotate3DVector(tailFactor, __rotateX, __rotateY, __rotateZ);
 		var output = __parentOutput.pos.add(tailFactor);
 		output.z *= 0.001 * Config.Z_SCALE;
-		return projection.transformVector(output, __parentOutput.pos);
+		return view.transformVector(output, __parentOutput.pos);
 	}
 
 	/**
@@ -122,15 +122,15 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 
 			var view = new Vector3(rotation.x + curPoint.x, rotation.y + curPoint.y, rotation.z);
 			view = __rotateTail(view);
-			if (Config.CAMERA3D_ENABLED)
-				view = parent.camera3D.applyViewTo(view);
+			// if (Config.CAMERA3D_ENABLED)
+			// 	view = parent.camera3D.applyViewTo(view);
 			view.z *= 0.001;
 
 			// The result of the perspective projection of rotation
 			var projection = view;
 
 			if (view.z != 0)
-				projection = this.projection.transformVector(view);
+				projection = this.view.transformVector(view);
 
 			quad.x = projection.x;
 			quad.y = projection.y;
@@ -314,6 +314,7 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 			return null;
 
 		var dc:DrawCommand = {
+			parent: item,
 			graphic: item.graphic,
 			antialiasing: item.antialiasing,
 			blend: item.blend,
@@ -345,7 +346,6 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 		pos += timeC2;
 
 		return {
-			__holdSubdivisionOffset: posOff,
 			hitTime: hitTime + posOff + timeC2,
 			distance: pos,
 			lane: lane,

@@ -4,6 +4,8 @@ import flixel.FlxBasic;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.math.FlxAngle;
+import flixel.math.FlxPoint;
 import flixel.tweens.FlxEase.EaseFunction;
 import modchart.backend.core.Node.NodeFunction;
 import modchart.backend.graphics.*;
@@ -11,6 +13,7 @@ import modchart.backend.graphics.renderers.*;
 import modchart.backend.util.ModchartUtil;
 import modchart.engine.events.types.*;
 import openfl.display.BitmapData;
+import openfl.geom.Matrix;
 import openfl.geom.Rectangle;
 
 #if !openfl_debug
@@ -18,26 +21,29 @@ import openfl.geom.Rectangle;
 @:noDebug
 #end
 final class PlayField extends FlxSprite {
+	public var context:Context;
+
 	public var events:EventManager;
 	public var modifiers:ModifierGroup;
-	public var camera3D:ModchartCamera3D;
 
-	private var renderer:ModchartRenderer;
+	public var view(get, never):View3D;
 
-	public var projection:ModchartPerspective;
+	public var skew(default, null):FlxPoint = FlxPoint.get();
+
+	var _skewMatrix:Matrix = new Matrix();
+
+	function get_view()
+		return context.view;
 
 	public function new() {
 		super();
 
 		moves = false;
 
-		this.events = new EventManager(this);
-		this.modifiers = new ModifierGroup(this);
+		events = new EventManager(this);
+		modifiers = new ModifierGroup(this);
 
-		renderer = new ModchartRenderer(this);
-
-		camera3D = new ModchartCamera3D();
-		projection = new ModchartPerspective();
+		context = new Context(this);
 
 		// default mods
 		addModifier('reverse');
@@ -49,6 +55,11 @@ final class PlayField extends FlxSprite {
 		setPercent('arrowPathAlpha', 1, -1);
 		setPercent('arrowPathThickness', 2, -1);
 		setPercent('rotateHoldY', 1, -1);
+
+		frameWidth = FlxG.width;
+		frameHeight = FlxG.height;
+
+		updateHitbox();
 	}
 
 	public inline function setPercent(name:String, value:Float, player:Int = -1)
@@ -187,12 +198,10 @@ final class PlayField extends FlxSprite {
 	}
 
 	override public function draw() {
-		__drawPlayField();
 		modifiers.postRender();
 	}
 
 	override public function destroy() {
-		renderer.dispose();
 		super.destroy();
 	}
 
@@ -201,11 +210,63 @@ final class PlayField extends FlxSprite {
 		return obj._fmVisible;
 	}
 
-	private function __drawPlayField() {
-		var playerItems:Array<Array<Array<FlxSprite>>> = Adapter.instance.getArrowItems();
+	private function transformCmd(cmd:DrawCommand) {
+		var vertex = cmd.vertices;
+		var vc = Std.int(vertex.length / 2);
 
-		if (playerItems == null)
-			return;
-		renderer.emit(playerItems);
+		final matrix = this._matrix;
+		matrix.identity();
+
+		if (flipX) {
+			matrix.scale(-1, 1);
+			matrix.translate(width, 0);
+		}
+
+		if (flipY) {
+			matrix.scale(1, -1);
+			matrix.translate(0, height);
+		}
+
+		matrix.translate(-origin.x, -origin.y);
+		matrix.scale(scale.x, scale.y);
+
+		if (bakedRotationAngle <= 0) {
+			updateTrig();
+			if (angle != 0)
+				matrix.rotateWithTrig(_cosAngle, _sinAngle);
+		}
+
+		updateSkewMatrix();
+		_matrix.concat(_skewMatrix);
+
+		// getScreenPosition(_point, camera).subtractPoint(offset);
+		_point.set().subtractPoint(offset);
+		_point.add(origin.x, origin.y);
+		matrix.translate(_point.x, _point.y);
+
+		// if (isPixelPerfectRender(camera)) {
+		// 	matrix.tx = Math.floor(matrix.tx);
+		// 	matrix.ty = Math.floor(matrix.ty);
+		// }
+
+		for (c in 0...vc) {
+			var i = c * 2;
+			var x = vertex[i];
+			var y = vertex[i + 1];
+
+			vertex[i] = matrix.transformX(x, y);
+			vertex[i + 1] = matrix.transformY(x, y);
+		}
+
+		return cmd;
+	}
+
+	function updateSkewMatrix():Void {
+		_skewMatrix.identity();
+
+		if (skew.x != 0 || skew.y != 0) {
+			_skewMatrix.b = Math.tan(skew.y * FlxAngle.TO_RAD);
+			_skewMatrix.c = Math.tan(skew.x * FlxAngle.TO_RAD);
+		}
 	}
 }

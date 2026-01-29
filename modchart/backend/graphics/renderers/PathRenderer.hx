@@ -23,10 +23,11 @@ final class PathRenderer extends BaseRenderer<FlxSprite> {
 	public function updateTris(divisions:Int) {
 		final segs = divisions - 1;
 		if (divisions != __lastDivisions) {
-			uvt = new NativeVector<Float>(segs * 12);
-			indices = new NativeVector<Int>(segs * 6);
+			uvt = new NativeVector<Float>(divisions * 12);
+			indices = new NativeVector<Int>(divisions * 6);
+
 			var ui = 0, ii = 0, vertCount = 0;
-			for (div in 0...divisions) {
+			for (div in 0...segs) {
 				for (_ in 0...4) {
 					uvt.set(ui++, 0);
 					uvt.set(ui++, 0);
@@ -51,7 +52,9 @@ final class PathRenderer extends BaseRenderer<FlxSprite> {
 	public function new(parent:PlayField) {
 		super(parent);
 
-		__lineGraphic = FlxG.bitmap.create(1, 1, 0xFFFFFFFF);
+		__lineGraphic = FlxG.bitmap.create(1, 1, 0xFFFFFFFF, true);
+		__lineGraphic.destroyOnNoUse = false;
+		__lineGraphic.persist = true;
 	}
 
 	var __lastPlayer:Int = -1;
@@ -101,15 +104,18 @@ final class PathRenderer extends BaseRenderer<FlxSprite> {
 		for (index in 0...divisions) {
 			var hitTime = -500 + interval * index;
 
-			var output = parent.modifiers.getPath(pathVector.clone(), {
+			var vec = pathVector.clone();
+			var param:ArrowData = {
 				hitTime: songPos + hitTime,
 				distance: hitTime,
 				lane: lane,
 				player: fn,
 				isTapArrow: true
-			});
+			};
 
-			if (lastOutput != null) {
+			var output = parent.modifiers.getPath(vec, param);
+
+			if (vertCount > 0) {
 				final p0 = lastOutput;
 				final p1 = output;
 
@@ -169,6 +175,7 @@ final class PathRenderer extends BaseRenderer<FlxSprite> {
 		updateTris(divisions);
 
 		var dc:DrawCommand = {
+			parent: item,
 			graphic: __lineGraphic,
 			antialiasing: false,
 			blend: NORMAL,
@@ -183,5 +190,11 @@ final class PathRenderer extends BaseRenderer<FlxSprite> {
 			hasColorOffsets: hasCOff
 		};
 		return dc;
+	}
+
+	override function dispose() {
+		__lineGraphic.destroy();
+
+		__lineGraphic = null;
 	}
 }

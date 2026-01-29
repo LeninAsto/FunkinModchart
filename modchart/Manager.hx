@@ -1,6 +1,7 @@
 package modchart;
 
 import flixel.FlxBasic;
+import flixel.FlxSprite;
 import flixel.tweens.FlxEase.EaseFunction;
 import flixel.util.FlxSort;
 import haxe.ds.Vector;
@@ -8,12 +9,20 @@ import modchart.backend.core.ArrowData;
 import modchart.backend.core.ModifierParameters;
 import modchart.backend.core.Node.NodeFunction;
 import modchart.backend.core.VisualParameters;
+import modchart.backend.graphics.CtxRenderer;
+import modchart.backend.graphics.DrawCommand;
 import modchart.backend.graphics.renderers.*;
 import modchart.backend.util.ModchartUtil;
 import modchart.engine.modifiers.list.*;
 import modchart.events.*;
 import modchart.events.types.*;
 
+/**
+ * This assembles the modchart components, including:
+ * - PlayFields
+ * - Event Timeline
+ * - Rendering
+ */
 @:allow(modchart.backend.ModifierGroup)
 @:access(modchart.engine.PlayField)
 #if !openfl_debug
@@ -27,6 +36,7 @@ final class Manager extends FlxBasic {
 
 	/**
 	 * Flag to enable or disable rendering of arrow paths.
+	 * `Deprecated`
 	 */
 	@:deprecated("Use `Config.RENDER_ARROW_PATHS` instead.")
 	public var renderArrowPaths:Bool = false;
@@ -36,10 +46,13 @@ final class Manager extends FlxBasic {
 	 */
 	public var playfields:Array<PlayField> = [];
 
+	private var renderer:CtxRenderer;
+
 	public function new() {
 		super();
 
 		instance = this;
+		renderer = new CtxRenderer();
 
 		Adapter.init();
 		Adapter.instance.onModchartingInitialization();
@@ -231,12 +244,14 @@ final class Manager extends FlxBasic {
 	}
 
 	/**
-	 * Draws all playfields, sorting them by z-order before drawing.
+	 * Draws all playfields.
 	 */
 	override function draw():Void {
-		iteratePlayfields(pf -> {
-			pf.draw();
-		});
+		var playerItems:Array<Array<Array<FlxSprite>>> = Adapter.instance.getArrowItems();
+
+		if (playerItems == null)
+			return;
+		renderer.emit(playerItems, playfields);
 	}
 
 	/**
@@ -258,5 +273,3 @@ final class Manager extends FlxBasic {
 	public static var ARROW_SIZE:Float = 160 * 0.7;
 	public static var ARROW_SIZEDIV2:Float = (160 * 0.7) * 0.5;
 }
-
-typedef Funny = {callback:Void->Void, z:Float};

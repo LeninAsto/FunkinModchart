@@ -204,7 +204,7 @@ class Codename implements IAdapter {
 			if (!sl.visible)
 				continue;
 			sl.forEach(st -> {
-				st.cameras = st._fmExtra.oldCameras;
+				st._cameras = st._fmExtra.oldCameras;
 			});
 			sl.notes.forEachAlive((spr) -> {
 				spr.cameras = spr._fmExtra.oldCameras;

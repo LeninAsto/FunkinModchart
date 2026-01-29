@@ -9,6 +9,8 @@ import openfl.display.BlendMode;
 @:structInit
 class DrawCommand {
 	// stuff
+	var parent:FlxSprite;
+
 	var graphic:FlxGraphic;
 	var antialiasing:Bool;
 	var blend:BlendMode;

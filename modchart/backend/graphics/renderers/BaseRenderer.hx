@@ -5,14 +5,14 @@ import flixel.FlxCamera;
 import flixel.util.FlxSignal;
 import flixel.util.FlxSort;
 
-@:allow(modchart.backend.graphics.ModchartRenderer)
+@:allow(modchart.backend.graphics.CtxRenderer)
 class BaseRenderer<T:FlxBasic> extends FlxBasic {
 	private var parent:Null<PlayField>;
 
-	private var projection(get, never):ModchartPerspective;
+	private var view(get, never):View3D;
 
-	function get_projection()
-		return parent.projection;
+	function get_view()
+		return parent.view;
 
 	public function new(parent:PlayField) {
 		super();
@@ -24,4 +24,6 @@ class BaseRenderer<T:FlxBasic> extends FlxBasic {
 	public function prepare(item:T):Null<DrawCommand> {
 		return null;
 	}
+
+	public function dispose() {}
 }

@@ -127,12 +127,12 @@ final class ArrowRenderer extends BaseRenderer<FlxSprite> {
 			rotation.y = rotation.y * depthScale * output.visuals.scaleY;
 
 			var view = new Vector3(rotation.x + arrowPosition.x, rotation.y + arrowPosition.y, rotation.z);
-			if (Config.CAMERA3D_ENABLED)
-				view = parent.camera3D.applyViewTo(view);
+			// if (Config.CAMERA3D_ENABLED)
+			// 	view = parent.camera3D.applyViewTo(view);
 			view.z *= 0.001 * Config.Z_SCALE;
 
 			// The result of the perspective projection of rotation
-			final projection = this.projection.transformVector(view);
+			final projection = this.view.transformVector(view);
 
 			planeVertices[vertPointer] = projection.x;
 			planeVertices[vertPointer + 1] = projection.y;
@@ -240,6 +240,7 @@ final class ArrowRenderer extends BaseRenderer<FlxSprite> {
 
 		// make the instruction
 		var dc:DrawCommand = {
+			parent: arrow,
 			graphic: arrow.graphic,
 			antialiasing: arrow.antialiasing,
 			blend: arrow.blend,
