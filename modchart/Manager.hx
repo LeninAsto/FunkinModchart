@@ -227,10 +227,16 @@ final class Manager extends FlxBasic {
 		iteratePlayfields((pf) -> pf.alias(name, alias), field);
 
 	/**
-	 * Adds a new playfield to the Manager.
+	 * Creates and adds a new playfield to the Manager.
 	 */
 	public inline function addPlayfield()
 		playfields.push(new PlayField());
+
+	/**
+	 * Adds a playfield to the Manager.
+	 */
+	public inline function appendPlayfield(playfield:PlayFiekd)
+		playfields.push(playfield);
 
 	/**
 	 * Updates all playfields in the game loop.
