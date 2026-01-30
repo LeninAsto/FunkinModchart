@@ -3,7 +3,7 @@
     "license": "Apache",
     "description": "An modcharting plugin for Friday Night Funkin'",
     "version": "1.2.5",
-    "releasenote": "Playfields rework, proxies and FNF V-Slice adapter",
+    "releasenote": "Rendering rework, major bugfixes",
     "contributors": ["TheoDev"],
     "tags": ["fnf", "friday-night-funkin"],
     "dependencies": {
