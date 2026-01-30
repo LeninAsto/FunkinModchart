@@ -20,9 +20,6 @@ And that’s just the start. FunkinModchart also gives you **extra cool stuff** 
 
 If you’ve ever used **NotITG** or **StepMania**, you’ll feel right at home.
 
-Also thanks to the standalone system inspired by [Schmovin'](https://github.com/4mbr0s3-2/Schmovin),
-cook your modchart code once... play it everywhere. More details bellow.
-
 ---
 
 ## Installation
