@@ -14,13 +14,17 @@ import modchart.backend.standalone.IAdapter;
 class Codename implements IAdapter {
 	public function new() {}
 
+	public function onModchartingDispose() {
+		FlxG.signals.postDraw.remove(postDraw);
+	}
+
 	public function onModchartingInitialization() {
-		// do nothing
 		#if (FM_ENGINE_VERSION == "1.0")
 		PlayState.instance.splashHandler.visible = false;
 		#end
 
 		FlxG.signals.postDraw.add(postDraw);
+		FlxG.signals.preStateSwitch.addOnce(() -> FlxG.signals.postDraw.remove(postDraw));
 	}
 
 	public function isTapNote(sprite:FlxSprite)
@@ -192,6 +196,7 @@ class Codename implements IAdapter {
 
 	function postDraw() {
 		var strumLineMembers = PlayState.instance.strumLines.members;
+
 		for (i in 0...strumLineMembers.length)
 			@:privateAccess {
 			final sl = strumLineMembers[i];
@@ -199,7 +204,7 @@ class Codename implements IAdapter {
 			if (!sl.visible)
 				continue;
 			sl.forEach(st -> {
-				st.cameras = st._fmExtra.oldCameras;
+				st._cameras = st._fmExtra.oldCameras;
 			});
 			sl.notes.forEachAlive((spr) -> {
 				spr.cameras = spr._fmExtra.oldCameras;

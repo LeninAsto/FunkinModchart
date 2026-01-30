@@ -1,11 +1,11 @@
-## August 10, 2021
+## October 8, 2024
 - Hold note quad rework (from Schmovin’)
 - Added modifiers (PathModifier, Bumpy, Infinite)
 - Fixed note positions
 - Improved code structure
 - Fixed hold size (`+= 6`)
 
-## August 10, 2021 (2)
+## October 8, 2024
 - Hold scale fix
 
 ## October 12, 2024
@@ -153,3 +153,8 @@
 ## October, 24, 2025
 - Fixed holds from player 0 appearing just after a hold from player 1 appears.
 - Added the logo.
+
+## January, 29, 2026
+- Rewrote rendering pipeline entirely.
+- Playfield now are affected by the FlxSprite (+skew) properties.
+- Major bugfixes.

@@ -10,6 +10,8 @@ class Fpsplus implements IAdapter {
 
 	public function new() {}
 
+	public function onModchartingDispose() {}
+
 	public function onModchartingInitialization() {
 		__fCrochet = Conductor.crochet / 4;
 	}
