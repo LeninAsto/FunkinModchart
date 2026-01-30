@@ -88,8 +88,8 @@ It defines all the essential methods the Modchart Manager depends on.
   > FunkinModchart renderers relies on default FlxSprite renderer — it won’t work with sprites that have its custom way for rendering.
 
 ### Steps
-1. Review the [IAdapter interface](/modchart/standalone/IAdapter.hx).  
-2. Check existing [adapter implementations](/modchart/standalone/adapters/) for examples.  
+1. Review the [IAdapter interface](https://github.com/theoo-h/FunkinModchart/blob/main/modchart/backend/standalone/IAdapter.hx).  
+2. Check existing [adapter implementations](https://github.com/theoo-h/FunkinModchart/blob/main/modchart/backend/standalone/adapters) for examples.  
 3. The adapter class name must match the value of your `FM_ENGINE` define (PascalCase).
 
 You can even **swap adapters at runtime** — perfect for editors or very crazy modcharts that could require it.
