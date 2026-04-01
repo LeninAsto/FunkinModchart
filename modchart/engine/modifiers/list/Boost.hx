@@ -7,19 +7,35 @@ import modchart.backend.core.ModifierParameters;
 import modchart.backend.util.ModchartUtil;
 
 class Boost extends Modifier {
+	// Pre-computed IDs to avoid Std.string(lane) allocations.
+	var _boostID:Int;
+	var _boostLaneIDs:Array<Int>;
+	var _brakeID:Int;
+	var _brakeLaneIDs:Array<Int>;
+	var _waveID:Int;
+	var _waveLaneIDs:Array<Int>;
+
 	public function new(pf) {
 		super(pf);
 
 		setPercent('waveMult', 1, -1);
+
+		final maxKeys = 16;
+		_boostID = findID('boost');
+		_boostLaneIDs = [for (l in 0...maxKeys) findID('boost' + l)];
+		_brakeID = findID('brake');
+		_brakeLaneIDs = [for (l in 0...maxKeys) findID('brake' + l)];
+		_waveID = findID('wave');
+		_waveLaneIDs = [for (l in 0...maxKeys) findID('wave' + l)];
 	}
 
 	override public function render(curPos:Vector3, params:ModifierParameters) {
 		var player = params.player;
-		var lane = Std.string(params.lane);
+		var lane = params.lane;
 
 		var fYOffset = params.distance;
 
-		final boost = (getPercent('boost', params.player) + getPercent('boost' + lane, params.player));
+		final boost = getUnsafe(_boostID, player) + getUnsafe(_boostLaneIDs[lane], player);
 		if (boost != 0) {
 			var fEffectHeight = HEIGHT;
 			var fNewYOffset = fYOffset * 1.5 / ((fYOffset + fEffectHeight / 1.2) / fEffectHeight);
@@ -29,7 +45,7 @@ class Boost extends Modifier {
 			curPos.y += fAccelYAdjust;
 		}
 
-		final brake = (getPercent('brake', params.player) + getPercent('brake' + lane, params.player));
+		final brake = getUnsafe(_brakeID, player) + getUnsafe(_brakeLaneIDs[lane], player);
 
 		if (brake != 0) {
 			var fEffectHeight = HEIGHT;
@@ -39,7 +55,7 @@ class Boost extends Modifier {
 			fBrakeYAdjust = ModchartUtil.clamp(fBrakeYAdjust, -400., 400.);
 			curPos.y += fBrakeYAdjust;
 		}
-		final wave = (getPercent('wave', params.player) + getPercent('wave' + lane, params.player));
+		final wave = getUnsafe(_waveID, player) + getUnsafe(_waveLaneIDs[lane], player);
 
 		if (wave != 0) {
 			curPos.y += wave * 20.0 * sin(fYOffset / 96.);

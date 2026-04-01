@@ -8,6 +8,14 @@ import modchart.backend.core.VisualParameters;
 import modchart.backend.util.ModchartUtil;
 
 class Stealth extends Modifier {
+	// Pre-computed IDs to avoid Std.string(lane) allocations.
+	var _stealthID:Int;
+	var _darkID:Int;
+	var _stealthLaneIDs:Array<Int>;
+	var _darkLaneIDs:Array<Int>;
+	var _alphaID:Int;
+	var _alphaLaneIDs:Array<Int>;
+
 	public function new(pf) {
 		super(pf);
 
@@ -20,6 +28,14 @@ class Stealth extends Modifier {
 		setPercent('hiddenStart', 5, -1);
 		setPercent('hiddenEnd', 3, -1);
 		setPercent('hiddenGlow', 1, -1);
+
+		final maxKeys = 16;
+		_stealthID = findID('stealth');
+		_darkID = findID('dark');
+		_stealthLaneIDs = [for (l in 0...maxKeys) findID('stealth' + l)];
+		_darkLaneIDs = [for (l in 0...maxKeys) findID('dark' + l)];
+		_alphaID = findID('alpha');
+		_alphaLaneIDs = [for (l in 0...maxKeys) findID('alpha' + l)];
 	}
 
 	private inline function computeSudden(data:VisualParameters, params:ModifierParameters) {
@@ -64,9 +80,10 @@ class Stealth extends Modifier {
 		final player = params.player;
 		final lane = params.lane;
 
-		final vMod = params.isTapArrow ? 'stealth' : 'dark';
-		final visibility = getPercent(vMod, player) + getPercent(vMod + Std.string(lane), player);
-		data.alpha = ((getPercent('alpha', player) + getPercent('alpha' + Std.string(lane), player)) * (1 - ((Math.max(0.5, visibility) - 0.5) * 2)));
+		final visibility = params.isTapArrow
+			? getUnsafe(_stealthID, player) + getUnsafe(_stealthLaneIDs[lane], player)
+			: getUnsafe(_darkID, player) + getUnsafe(_darkLaneIDs[lane], player);
+		data.alpha = ((getUnsafe(_alphaID, player) + getUnsafe(_alphaLaneIDs[lane], player)) * (1 - ((Math.max(0.5, visibility) - 0.5) * 2)));
 		data.glow += visibility * 2;
 
 		// sudden & hidden

@@ -21,6 +21,9 @@ private final class HoldSegment {
 
 final __matrix:Matrix = new Matrix();
 
+/** Reusable unit-up vector for OPTIMIZE_HOLDS path — avoids allocating `new Vector3(0,1,0)` per segment. */
+final __holdUnitUp:Vector3 = new Vector3(0, 1, 0);
+
 #if !openfl_debug
 @:fileXml('tags="haxe,release"')
 @:noDebug
@@ -85,7 +88,7 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 		var unit:Vector3;
 
 		if (Config.OPTIMIZE_HOLDS) {
-			unit = new Vector3(0, 1, 0);
+			unit = __holdUnitUp;
 		} else {
 			var next = parent.modifiers.getPath(basePos.clone(), params, 1, false, true);
 			next.pos.z = 0;
@@ -173,6 +176,12 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 		}
 	}
 
+	// Pre-allocated vertex, transform, and ArrowData buffers to reduce GC pressure.
+	var _holdVertexBuf:NativeVector<Float>;
+	var _holdTransformBuf:NativeVector<ColorTransform>;
+	final _arrowParamBuf:ArrowData = {hitTime: 0, distance: 0, lane: 0, player: 0, hitten: false, isTapArrow: true};
+	final _parentDataBuf:ArrowData = {hitTime: 0, distance: 0, lane: 0, player: 0, hitten: false, isTapArrow: true};
+
 	var __lastLong:Float = 0;
 	var __lastC2:Float = 0;
 	var __lastDizzy:Float = 0;
@@ -194,7 +203,9 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 
 		final HOLD_SUBDIVISIONS = Adapter.instance.getHoldSubdivisions(item);
 
-		updateIndices(HOLD_SUBDIVISIONS);
+		// Only rebuild index buffer when subdivision count changes.
+		if (HOLD_SUBDIVISIONS != __lastHoldSubs)
+			updateIndices(HOLD_SUBDIVISIONS);
 
 		final player = Adapter.instance.getPlayerFromArrow(item);
 		final lane = Adapter.instance.getLaneFromArrow(item);
@@ -203,8 +214,15 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 		basePos.x += Adapter.instance.getDefaultReceptorX(lane, player);
 		basePos.y += Adapter.instance.getDefaultReceptorY(lane, player);
 
-		var vertices = new NativeVector(8 * HOLD_SUBDIVISIONS);
-		var transfTotal = new NativeVector<ColorTransform>(HOLD_SUBDIVISIONS);
+		// Grow pre-alloc'd vertex and color-transform buffers as needed.
+		final vSize = 8 * HOLD_SUBDIVISIONS;
+		if (_holdVertexBuf == null || _holdVertexBuf.length < vSize)
+			_holdVertexBuf = new NativeVector<Float>(vSize);
+		final vertices = _holdVertexBuf;
+
+		if (_holdTransformBuf == null || _holdTransformBuf.length < HOLD_SUBDIVISIONS)
+			_holdTransformBuf = new NativeVector<ColorTransform>(HOLD_SUBDIVISIONS);
+		final transfTotal = _holdTransformBuf;
 		var tID = 0;
 
 		var lastData:ArrowData = null;
@@ -224,15 +242,13 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 		__rotateZ = canUseLast ? __lastRZ : (__lastRZ = parent.getPercent('holdRotateZ', player));
 
 		var parentTime = Adapter.instance.getHoldParentTime(item);
-		var parentData:ArrowData = {
-			hitTime: parentTime,
-			// this fixed the clipping gaps
-			distance: Math.max(0, parentTime - Adapter.instance.getSongPosition()),
-			lane: lane,
-			player: player,
-			hitten: Adapter.instance.arrowHit(item),
-			isTapArrow: true
-		};
+		_parentDataBuf.hitTime = parentTime;
+		_parentDataBuf.distance = Math.max(0, parentTime - Adapter.instance.getSongPosition());
+		_parentDataBuf.lane = lane;
+		_parentDataBuf.player = player;
+		_parentDataBuf.hitten = Adapter.instance.arrowHit(item);
+		_parentDataBuf.isTapArrow = true;
+		final parentData:ArrowData = _parentDataBuf;
 		if (__rotateX != 0 || __rotateY != 0 || __rotateZ != 0) {
 			__parentOutput = parent.modifiers.getPath(basePos.clone(), parentData);
 			__parentOutput.pos.z = (__parentOutput.pos.z - 1) * 1000;
@@ -335,8 +351,8 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 	}
 
 	inline private function getArrowParams(arrow:FlxSprite, posOff:Float = 0):ArrowData {
-		final player = Adapter.instance.getPlayerFromArrow(arrow);
-		final lane = Adapter.instance.getLaneFromArrow(arrow);
+		var player = Adapter.instance.getPlayerFromArrow(arrow);
+		var lane = Adapter.instance.getLaneFromArrow(arrow);
 
 		final timeC2 = flixel.FlxG.height * 0.25 * __centered2;
 		final hitTime = Adapter.instance.getTimeFromArrow(arrow);
@@ -345,13 +361,11 @@ final class HoldRenderer extends BaseRenderer<FlxSprite> {
 
 		pos += timeC2;
 
-		return {
-			hitTime: hitTime + posOff + timeC2,
-			distance: pos,
-			lane: lane,
-			player: player,
-			hitten: Adapter.instance.arrowHit(arrow),
-			isTapArrow: true
-		};
+		_arrowParamBuf.hitTime = hitTime + posOff + timeC2;
+		_arrowParamBuf.distance = pos;
+		_arrowParamBuf.lane = lane;
+		_arrowParamBuf.player = player;
+		_arrowParamBuf.hitten = Adapter.instance.arrowHit(arrow);
+		return _arrowParamBuf;
 	}
 }

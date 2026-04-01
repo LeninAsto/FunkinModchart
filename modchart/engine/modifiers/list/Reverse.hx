@@ -10,30 +10,66 @@ import modchart.backend.util.ModchartUtil;
 // Default modifier
 // Handles scroll speed, scroll angle and reverse modifiers
 class Reverse extends Modifier {
+	// Pre-computed IDs to avoid string allocations in the hot render path.
+	var _splitID:Int;
+	var _alternateID:Int;
+	var _crossID:Int;
+	var _reverseGlobalID:Int;
+	var _reverseIDs:Array<Int>;
+	var _unboundedReverseID:Int;
+	var _centeredID:Int;
+	var _xmodGlobalID:Int;
+	var _xmodLaneIDs:Array<Int>;
+	var _scrollAngleXID:Int;
+	var _scrollAngleYID:Int;
+	var _scrollAngleZID:Int;
+	var _curvedScrollPeriodID:Int;
+	var _curvedScrollXID:Int;
+	var _curvedScrollYID:Int;
+	var _curvedScrollZID:Int;
+
 	public function new(pf) {
 		super(pf);
 
 		setPercent('xmod', 1, -1);
+
+		final maxKeys = 16;
+		_splitID = findID('split');
+		_alternateID = findID('alternate');
+		_crossID = findID('cross');
+		_reverseGlobalID = findID('reverse');
+		_reverseIDs = [for (l in 0...maxKeys) findID('reverse' + l)];
+		_unboundedReverseID = findID('unboundedReverse');
+		_centeredID = findID('centered');
+		_xmodGlobalID = findID('xmod');
+		_xmodLaneIDs = [for (l in 0...maxKeys) findID('xmod' + l)];
+		_scrollAngleXID = findID('scrollAngleX');
+		_scrollAngleYID = findID('scrollAngleY');
+		_scrollAngleZID = findID('scrollAngleZ');
+		_curvedScrollPeriodID = findID('curvedScrollPeriod');
+		_curvedScrollXID = findID('curvedScrollX');
+		_curvedScrollYID = findID('curvedScrollY');
+		_curvedScrollZID = findID('curvedScrollZ');
 	}
 
 	public function getReverseValue(dir:Int, player:Int) {
 		var kNum = getKeyCount();
 		var val:Float = 0;
 		if (dir >= Math.floor(kNum * 0.5))
-			val = val + getPercent("split", player);
+			val += getUnsafe(_splitID, player);
 
 		if ((dir % 2) == 1)
-			val = val + getPercent("alternate", player);
+			val += getUnsafe(_alternateID, player);
 
 		var first = kNum * 0.25;
 		var last = kNum - 1 - first;
 
 		if (dir >= first && dir <= last)
-			val = val + getPercent("cross", player);
+			val += getUnsafe(_crossID, player);
 
-		val = val + getPercent('reverse', player) + getPercent("reverse" + Std.string(dir), player);
+		val += getUnsafe(_reverseGlobalID, player) + getUnsafe(_reverseIDs[dir], player);
 
-		if (getPercent("unboundedReverse", player) == 0) {
+		if (getUnsafe(_unboundedReverseID, player) == 0) {
 			val %= 2;
 			if (val > 1)
 				val = 2 - val;
@@ -51,7 +87,7 @@ class Reverse extends Modifier {
 		var reversePerc = getReverseValue(params.lane, player);
 		var shift = FlxMath.lerp(initialY, HEIGHT - initialY, reversePerc);
 
-		var centerPercent = getPercent('centered', params.player);
+		var centerPercent = getUnsafe(_centeredID, player);
 		shift = FlxMath.lerp(shift, (HEIGHT * 0.5) - ARROW_SIZEDIV2, centerPercent);
 
 		var distance = params.distance;
@@ -75,19 +111,19 @@ class Reverse extends Modifier {
 		var angleZ = 0.;
 
 		// Speed
-		scroll.y = scroll.y * (getPercent('xmod', player) + getPercent('xmod' + Std.string(params.lane), player));
+		scroll.y *= getUnsafe(_xmodGlobalID, player) + getUnsafe(_xmodLaneIDs[params.lane], player);
 
 		// Main
-		angleX = angleX + getPercent('scrollAngleX', player);
-		angleY = angleY + getPercent('scrollAngleY', player);
-		angleZ = angleZ + getPercent('scrollAngleZ', player);
+		angleX += getUnsafe(_scrollAngleXID, player);
+		angleY += getUnsafe(_scrollAngleYID, player);
+		angleZ += getUnsafe(_scrollAngleZID, player);
 
 		// Curved
-		final shift:Float = params.distance * 0.25 * (1 + getPercent('curvedScrollPeriod', player));
+		final shift:Float = params.distance * 0.25 * (1 + getUnsafe(_curvedScrollPeriodID, player));
 
-		angleX = angleX + shift * getPercent('curvedScrollX', player);
-		angleY = angleY + shift * getPercent('curvedScrollY', player);
-		angleZ = angleZ + shift * getPercent('curvedScrollZ', player);
+		angleX += shift * getUnsafe(_curvedScrollXID, player);
+		angleY += shift * getUnsafe(_curvedScrollYID, player);
+		angleZ += shift * getUnsafe(_curvedScrollZID, player);
 
 		// angleY doesnt do anything if angleX and angleZ are disabled
 		if (angleX == 0 && angleZ == 0)
