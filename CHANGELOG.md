@@ -158,3 +158,10 @@
 - Rewrote rendering pipeline entirely.
 - Playfield now are affected by the FlxSprite (+skew) properties.
 - Major bugfixes.
+
+## April, 1, 2026
+- Added Lua callbacks for Psych and PSlice
+- Updated ModifierGroup to eliminate case sensitivity in percent keys.
+- Enhanced Beat, Boost, Bumpy, Confusion, Reverse, Scale, Skew, Stealth, and Transform modifiers by pre-computing IDs for lanes and axes to reduce runtime string allocations.
+- Replaced getPercent calls with getUnsafe for improved efficiency in apply methods across various modifiers.
+- Streamlined apply methods in Bumpy, Boost, and other modifiers to utilize pre-computed IDs, enhancing performance during rendering.

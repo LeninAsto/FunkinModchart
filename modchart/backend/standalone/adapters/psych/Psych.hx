@@ -59,14 +59,23 @@ class Psych implements IAdapter {
 			final _fl = funkinLua;
 			if (lua == null) continue;
 
-			Lua_helper.add_callback(lua, 'modchartSetPercent', function(name:String, value:Float, player:Int) {
-				Manager.instance.globalPlayfield.setPercent(name, value, player);
+			Lua_helper.add_callback(lua, 'addManager', function() {
+				if (Manager.instance == null)
+					Manager.instance = new Manager();
 			});
-			Lua_helper.add_callback(lua, 'modchartGetPercent', function(name:String, player:Int):Float {
-				return Manager.instance.globalPlayfield.getPercent(name, player);
+
+			Lua_helper.add_callback(lua, 'setPercent', function(name:String, value:Float, ?player:Int = -1, ?field:Int = -1) {
+				if (Manager.instance != null)
+					Manager.instance.setPercent(name, value, player, field);
 			});
-			Lua_helper.add_callback(lua, 'modchartAddModifier', function(name:String) {
-				Manager.instance.globalPlayfield.addModifier(name);
+			Lua_helper.add_callback(lua, 'getPercent', function(name:String, ?player:Int = 0, ?field:Int = 0):Float {
+				if (Manager.instance != null)
+					return Manager.instance.getPercent(name, player, field);
+				return 0.;
+			});
+			Lua_helper.add_callback(lua, 'addModifier', function(name:String, ?field:Int = -1) {
+				if (Manager.instance != null)
+					Manager.instance.addModifier(name, field);
 			});
 			Lua_helper.add_callback(lua, 'setHoldSubdivisions', function(value:Int) {
 				setHoldSubdivisions(value);
@@ -74,7 +83,7 @@ class Psych implements IAdapter {
 			Lua_helper.add_callback(lua, 'getHoldSubdivisions', function():Int {
 				return getHoldSubdivisions(null);
 			});
-			Lua_helper.add_callback(lua, 'modchartSetConfig', function(key:String, value:Dynamic) {
+			Lua_helper.add_callback(lua, 'setConfig', function(key:String, value:Dynamic) {
 				switch (key.toLowerCase()) {
 					case 'columnspecificmodifiers': Config.COLUMN_SPECIFIC_MODIFIERS = value;
 					case 'optimizeholds': Config.OPTIMIZE_HOLDS = value;
