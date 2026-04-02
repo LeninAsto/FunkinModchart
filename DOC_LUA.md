@@ -254,7 +254,7 @@ getArrowSizeDiv2();
  * Returns the notes from a given chart.
  * Each note entry contains: { step:Float, type:Int, time:Float }
  *
- * chartName:String The chart difficulty name (e.g. "hard").
+ * chartName:String The modchart chart name (e.g. "modchart-notes").
  * songName:String  The song folder name. Uses the current song if not provided.
  *
  * returns: Array<{ step:Float, type:Int, time:Float }>
